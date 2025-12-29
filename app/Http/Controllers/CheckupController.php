@@ -885,24 +885,26 @@ class CheckupController extends Controller
         ])->post('http://172.20.1.12/dbstaff/api/auth', [
             "userid"   => $request->user,
             "password" => $request->password,
-        ])->object();
+        ]);
 
-        if ($response->status == 1) {
-            session(['userid' => $response->user->userid, 'name' => $response->user->name]);
+        if ($response->successful()) {
+            $data = $response->object();
+            if (isset($data->status) && $data->status == 1) {
+                session(['userid' => $data->user->userid, 'name' => $data->user->name]);
 
-            $user = User::firstOrCreate([
-                'userid' => $response->user->userid,
-                'name'   => $response->user->name,
-            ]);
+                $user = User::firstOrCreate([
+                    'userid' => $data->user->userid,
+                    'name'   => $data->user->name,
+                ]);
 
-            if (Auth::loginUsingId($user->id)) {
+                if (Auth::loginUsingId($user->id)) {
 
-                return response()->json(['status' => 1, 'text' => 'Authentication Success!'], 200);
-            } else {
+                    return response()->json(['status' => 1, 'text' => 'Authentication Success!'], 200);
+                } else {
 
-                return response()->json(['status' => 0, 'text' => 'Authentication Success , User not found!'], 200);
+                    return response()->json(['status' => 0, 'text' => 'Authentication Success , User not found!'], 200);
+                }
             }
-
         }
 
         return response()->json(['status' => 0, 'text' => 'Authentication Failed!'], 200);
@@ -964,6 +966,7 @@ class CheckupController extends Controller
                     'HNPAT_NAME.LastName',
                 )
                 ->get();
+
             if (count($data) > 0) {
                 foreach ($data as $row) {
                     $data = Master::whereDate('check_in', date('Y-m-d'))
