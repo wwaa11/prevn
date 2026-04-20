@@ -5,7 +5,7 @@
             Check Information
         </div>
         <div class="flex m-auto gap-3">
-            <input id="search" autocomplete="off" placeholder="HN,PHONE,IDCARD" type="text"
+            <input id="search" autocomplete="off" placeholder="HN,PHONE,IDCARD" type="text" autofocus autocapitalize="off"
                 class="flex-grow p-3 border-2 border-blue-600 w-full rounded">
             <button class="rounded border-2 border-blue-600 text-blue-600 p-3" onclick="search()">Search</button>
         </div>

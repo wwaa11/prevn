@@ -28,3 +28,5 @@ Route::post('/walkin/genQueue', [CheckupController::class, 'requestQueue']);
 Route::get('/sms/{hasHN}', [CheckupController::class, 'smsView']);
 Route::post('/sms/genQueue', [CheckupController::class, 'requestQueue']);
 Route::get('/sms/viewqueue/{hn}', [CheckupController::class, 'myQueue']);
+
+Route::get('/smsnew/{hasHN}', [CheckupController::class, 'viewAppointment']);

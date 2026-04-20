@@ -20,21 +20,8 @@ class CheckupController extends Controller
 
     public function test()
     {
-        $fileList = [];
-        // $publicPath = public_path();
-        // dump($publicPath);
-        // $files = File::allFiles($publicPath);
-        // foreach ($files as $file) {
-        //     $fileList[] = [
-        //         'path'          => $file->getPathname(),         // Full absolute path
-        //         'relative_path' => $file->getRelativePathname(), // Path relative to public folder
-        //         'filename'      => $file->getFilename(),         // Just the filename
-        //         'size'          => $file->getSize(),             // Size in bytes
-        //     ];
-        // }
-        // dd($fileList);
 
-        return view('success')->with(compact('fileList'));
+        return view('success');
     }
     public function dispatchGenerate()
     {
@@ -391,7 +378,7 @@ class CheckupController extends Controller
                                     $code = 'H';
                                     break;
                                 case '13':
-                                    $code = 'V';
+                                    $code = 'H';
                                     break;
                                 case 'U':
                                     $code = 'U';
@@ -1013,5 +1000,49 @@ class CheckupController extends Controller
         }
 
         return response()->json(['status' => 'success', 'result' => $html], 200);
+    }
+
+    // new HIS
+    public function getNumber($hn)
+    {
+
+    }
+
+    public function viewAppointment($hashHN)
+    {
+        $text = (object) [
+            'checkup'     => $this->lang('checkup'),
+            'name'        => $this->lang('name'),
+            'app_no'      => $this->lang('app_no'),
+            'app_date'    => $this->lang('app_date'),
+            'app_time'    => $this->lang('app_time'),
+            'range_check' => $this->lang('range_check'),
+        ];
+
+        $getHN = DB::connection('SMS')
+            ->table('TB_HAS_HN')
+            ->where('hasHN', $hashHN)
+            ->first();
+
+        if ($getHN == null) {
+            $hn = $hashHN;
+        } else {
+            $hn = $getHN->HN;
+        }
+
+        $patient = Http::withoutVerifying()->withHeaders([
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . env('QUEUE_API_TOKEN'),
+        ])->post('https://checkup.int-app.praram9.com/checkup/api/get-patient', [
+            "hn" => $hn
+        ]);
+        $patient = $patient->json();
+        dd($patient);
+        if($patient['message'] == 'Error'){
+
+            return view('newSMS.noHN');
+        }
+
+        return view('newSMS.appointment')->with(compact('patient', 'text'));
     }
 }
