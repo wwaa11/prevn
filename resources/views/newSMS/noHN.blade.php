@@ -1,37 +1,29 @@
-@extends('layouts.app')
+@extends('newSMS.layout')
+
+@section('title', 'CheckUP - Praram 9 Hospital')
+
 @section('content')
-    <style>
-        .bg-praram9 {
-            border-radius: 10px;
-            color: #fff;
-            background: #37beaf;
-            background: linear-gradient(117deg, rgba(55, 190, 175, 1) 0%, rgba(11, 162, 171, 1) 91%);
-        }
-    </style>
-    <div class="mb-3 mt-6 text-center text-2xl font-bold">
-        <div>{{ $text->checkup }}</div>
+<div class="container mx-auto px-6 pt-10 pb-16 flex flex-col items-center">
+    
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">
+            {{ $text->checkup }}
+        </h1>
+        <div class="h-1.5 w-20 bg-teal-500 rounded-full mx-auto mt-4"></div>
     </div>
-    <div class="flex p-3">
-        <div class="m-auto mt-6 shadow-lg p-6 mb-6 w-full md:w-3/4 bg-praram9 text-center">
-            <div class="mb-3">{{ $text->name }}</div>
-            <div class="mb-3">{{ $hnDetail->name }} ( {{ $hnDetail->HN }} )</div>
-            <div class="mb-3">{{ $text->app_no }}</div>
-            <div class="mb-3">{{ $hnDetail->appNo }}</div>
-            <div class="mb-3">{{ $text->app_date }}</div>
-            <div class="mb-3">{{ $hnDetail->appDate }}</div>
-            <div class="mb-3">{{ $text->app_time }}</div>
-            <div class="mb-3">{{ $hnDetail->appTime }}</div>
-            <div class="m-auto flex-grow mt-6" id="checkLo">
-                <div class="text-center cursor-pointer p-3 font-bold rounded border-blue-600 text-yellow-300 mt-3 text-3xl">
-                    {{ $text->range_check }}
+
+    <div class="w-full max-w-lg transition-all hover:scale-[1.01]">
+        <div class="gradient-card p-10 text-white shadow-2xl relative group">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all"></div>
+            
+            <div class="relative z-10">
+                <div class="bg-black/10 border border-white/20 rounded-2xl py-8 px-4 text-center backdrop-blur-sm">
+                    <span class="text-xl font-medium opacity-90 tracking-wide italic">
+                        ไม่พบข้อมูลผู้ป่วย
+                    </span>
                 </div>
             </div>
-            <div class="hidden m-auto flex-grow mt-6">
-                <div class="text-center cursor-pointer p-3 mt-3">
-                    <button type="button" class="rounded text-yellow-300 bg-[#37beaf] p-3 w-full md:w-1/2 shadow text-4xl font-bold">TEST</button>
-                </div>
-            </div>
-            {{-- <div class="text-5xl">&nbsp;</div> --}}
         </div>
     </div>
+</div>
 @endsection

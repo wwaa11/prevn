@@ -87,6 +87,12 @@ class CheckupController extends Controller
                 case "checkup":
                     $trans_text = "Check UP Center : Building B floor 12.";
                     break;
+                case "wait_queue":
+                    $trans_text = "Please wait to be called at the service point.";
+                    break;
+                case "noAppointment":
+                    $trans_text = "No appointment found today<br>Please contact the counter for more information.";
+                    break;
                 default:
                     $trans_text = $text;
                     break;
@@ -146,6 +152,12 @@ class CheckupController extends Controller
                     break;
                 case "checkup":
                     $trans_text = "ศูนย์ตรวจสุขภาพ : อาคาร B ชั้น 12.";
+                    break;
+                case "wait_queue":
+                    $trans_text = "กรุณารอเรียกที่จุดบริการ";
+                    break;
+                case "noAppointment":
+                    $trans_text = "ไม่พบข้อมูลการนัดหมายในวันนี้<br>กรุณาติดต่อเคาน์เตอร์เพื่อสอบถาม";
                     break;
                 default:
                     $trans_text = $text;
@@ -1003,32 +1015,20 @@ class CheckupController extends Controller
     }
 
     // new HIS
-    public function getNumber($hn)
-    {
-
-    }
-
     public function viewAppointment($hashHN)
     {
         $text = (object) [
             'checkup'     => $this->lang('checkup'),
             'name'        => $this->lang('name'),
-            'app_no'      => $this->lang('app_no'),
-            'app_date'    => $this->lang('app_date'),
-            'app_time'    => $this->lang('app_time'),
-            'range_check' => $this->lang('range_check'),
+            'wait_queue'  => $this->lang('wait_queue'),
+            'noAppointment'  => $this->lang('noAppointment'),
         ];
 
         $getHN = DB::connection('SMS')
             ->table('TB_HAS_HN')
             ->where('hasHN', $hashHN)
             ->first();
-
-        if ($getHN == null) {
-            $hn = $hashHN;
-        } else {
-            $hn = $getHN->HN;
-        }
+        $hn = $getHN->HN;
 
         $patient = Http::withoutVerifying()->withHeaders([
             'Content-Type' => 'application/json',
@@ -1036,13 +1036,56 @@ class CheckupController extends Controller
         ])->post('https://checkup.int-app.praram9.com/checkup/api/get-patient', [
             "hn" => $hn
         ]);
-        $patient = $patient->json();
-        dd($patient);
-        if($patient['message'] == 'Error'){
-
-            return view('newSMS.noHN');
+        if($patient->status() != 200){
+            return view('newSMS.noHN')->with(compact('text'));
         }
 
+        $patient = $patient->json();
+        $patient = [
+            'appointment' => $patient['appointment_detail']['success'] == true,
+            'hn' => $patient['hn'],
+            'name' => $patient['name'],
+            'appointment_service' => $patient['appointment_detail']['data'][0]['aptservice'] ?? null,
+            'appointment_time' => $patient['appointment_detail']['data'][0]['starttime'] ?? null,
+            'is_checkin' => $patient['checkin'] != null,
+            'number' => $patient['prevn_number'],
+            'checkin' => $patient['checkin'],
+        ];
+
         return view('newSMS.appointment')->with(compact('patient', 'text'));
+    }
+
+    public function checkLocationNew(Request $request)
+    {
+        if ($request->lat == '-' || $request->log == '-') {
+            return response()->json(['status' => 'error_location'], 200);
+        }
+
+        $outputDistant = $this->latlogCheck($request->lat, $request->log);
+
+        if ($outputDistant > $this->LocationDistant) {
+            return response()->json([
+                'status' => 'eligible', //out_of_range
+                'distance' => round($outputDistant, 1)
+            ], 200);
+        }
+
+        return response()->json(['status' => 'eligible'], 200);
+    }
+
+    public function getNumber(Request $request)
+    {
+        $hn = $request->hn;
+        $number = Http::withoutVerifying()->withHeaders([
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . env('QUEUE_API_TOKEN'),
+        ])->post('https://apigw.praram9.com/checkupgetnumber', [
+            "hn" => $hn
+        ]);
+        if($number->status() != 200){
+            return response()->json(['status' => 'error'], 200);
+        }
+
+        return response()->json(['status' => 'success'], 200);
     }
 }
