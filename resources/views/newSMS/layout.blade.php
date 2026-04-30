@@ -44,24 +44,26 @@
 </head>
 <body class="antialiased text-slate-800 flex flex-col min-h-screen">
 
-    <nav class="flex items-center justify-between p-4 md:px-8 bg-white/50 backdrop-blur-md sticky top-0 z-50">
-        <div class="w-12"></div> <img width="70" src="{{ asset("images/logo.png") }}" alt="Praram 9 Logo" class="hover:opacity-80 transition-opacity">
+    <div class="flex p-4 md:px-8 bg-white/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex-1">
+            <img width="70" src="{{ asset("images/logo.png") }}" alt="Praram 9 Logo" class="hover:opacity-80 transition-opacity">
+        </div>
 
-        <div class="relative">
+        <div class="flex-0 ">
             <select id="langSelecter" onchange="langSelect()" 
                 class="custom-select block text-sm font-medium bg-white border border-slate-200 text-slate-600 py-1.5 pl-3 pr-8 rounded-full focus:ring-2 focus:ring-teal-500 transition-all cursor-pointer shadow-sm">
                 <option value="TH" @if (session("langSelect") == "TH") selected @endif>TH</option>
                 <option value="ENG" @if (session("langSelect") == "ENG") selected @endif>ENG</option>
             </select>
         </div>
-    </nav>
+    </div>
 
     <main class="flex-grow">
         @yield('content')
     </main>
 
     <footer class="p-8 text-center text-slate-400 text-xs">
-        <p>&copy; {{ date('Y') }} Praram 9 Hospital. Premium Digital Experience.</p>
+        <p>&copy; {{ date('Y') }} Praram 9 Hospital.</p>
     </footer>
 
     <script>
